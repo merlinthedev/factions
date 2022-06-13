@@ -6,6 +6,7 @@ import me.merlin.command.Command;
 import me.merlin.command.CommandArgs;
 import me.merlin.faction.Faction;
 import me.merlin.faction.FactionHandler;
+import me.merlin.menu.MenuHandler;
 import me.merlin.profile.Profile;
 import me.merlin.profile.ProfileHandler;
 import org.bukkit.Bukkit;
@@ -13,7 +14,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -126,8 +126,8 @@ public class FactionCommands {
 
         profile.getFaction().getInvited().add(target.getUniqueId());
         player.sendMessage("§7You have invited §e" + target.getName() + " §7to your faction!");
-        target.sendMessage("§7You have been invited to §e" + profile.getFaction().getName() + " §7by §e" + player.getName() + "§7!");
-        target.sendMessage("§7Type §e/faction join <§e" + profile.getFaction().getName() + "§7>to join the faction!");
+        target.sendMessage("§7You have been invited to §6§l" + profile.getFaction().getName() + " §r§7by §e" + player.getName() + "§7!");
+        target.sendMessage("§7Type §e/faction join §6§l" + profile.getFaction().getName() + " §r§7to join the faction!");
         return;
 
     }
@@ -227,7 +227,7 @@ public class FactionCommands {
         } else {
             t = "Wilderness";
         }
-        player.sendMessage("§6_______________.[§2" + t + "§6]._______________");
+        player.sendMessage("§6___________________.[§2" + t + "§6].___________________");
         String[][] map = new String[11][29];
         for (String[] rows : map) {
             Arrays.fill(rows, "§7-");
@@ -267,6 +267,12 @@ public class FactionCommands {
             return;
         }
 
+        // check if the player is within x 250 & x -250 & z 250 & z -250
+        if (player.getLocation().getX() < 255 && player.getLocation().getX() > -255 && player.getLocation().getZ() < 255 && player.getLocation().getZ() > -255) {
+            player.sendMessage("§cYou can't claim in this area.");
+            return;
+        }
+
 
         if (faction == null) {
             player.sendMessage("§cYou are not in a faction.");
@@ -293,6 +299,7 @@ public class FactionCommands {
 
 
         faction.getClaims().add(chunk);
+        Factions.getInstance().getFactionHandler().updateClaimHandler();
         player.sendMessage("§2§lYou have claimed the current chunk for: §6" + faction.getName());
         return;
     }
@@ -472,10 +479,24 @@ public class FactionCommands {
 
 
     //Faction UPGRADE
-    @Command(name = "faction.upgrade", aliases = {"f.upgrade"}, inGameOnly = true)
+    @Command(name = "faction.upgrades", aliases = {"f.upgrades"}, inGameOnly = true)
     public void factionUpgrade(CommandArgs args) {
         Player player = args.getPlayer();
         Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        if (profile.getFaction() == null) {
+            player.sendMessage("§cYou are not in a faction!");
+            return;
+        }
+
+        if (!profile.getFaction().getOwner().equals(player.getUniqueId())) {
+            player.sendMessage("§cYou are not the faction leader!");
+            return;
+        }
+
+
+        player.openInventory(MenuHandler.openMainMenu(player));
+
+
     }
 
 
@@ -493,7 +514,6 @@ public class FactionCommands {
         player.sendMessage("§7Power: §e" + targetProfile.getFaction().getPower() + "/" + targetProfile.getFaction().getMaxPower() + "/" + targetProfile.getFaction().getClaims().size());
 
     }
-
 
 
     private boolean chunkComparison(Chunk target, Faction faction) {
@@ -530,7 +550,6 @@ public class FactionCommands {
     }
 
 
-
     //Faction WORLD CHECK
     @Command(name = "faction.worldcheck", aliases = {"f.wc", "f.w.c"}, inGameOnly = true, permission = "faction.mod.worldcheck")
     public void factionWorldCheck(CommandArgs commandArgs) {
@@ -538,18 +557,53 @@ public class FactionCommands {
 
     }
 
+    //Faction ADVANCE CHECK
+    @Command(name = "faction.advance.check", aliases = {"f.ac", "f.a.c"}, inGameOnly = true, permission = "faction.mod.advance.check")
+    public void factionAdvanceCheck(CommandArgs commandArgs) {
+        Player player = commandArgs.getPlayer();
+        if(commandArgs.length() < 1) {
+            if(Factions.getInstance().getProfileHandler().getProfile(player).getFaction() == null) {
+                player.sendMessage("§cYou are not in a faction!");
+                return;
+            }
+
+            Faction faction = Factions.getInstance().getProfileHandler().getProfile(player).getFaction();
+            player.sendMessage("§7§lFaction name: §e" + faction.getName());
+            player.sendMessage("§7§lFaction owner: §e" + Bukkit.getOfflinePlayer(faction.getOwner()).getName());
+            // send the player all the members
+            StringBuilder members = new StringBuilder();
+
+            faction.getMembers().forEach(member -> {
+                if(Bukkit.getOfflinePlayer(member).isOnline()) {
+                    members.append("§2").append(Bukkit.getOfflinePlayer(member).getName()).append(", ");
+                } else {
+                    members.append("§4").append(Bukkit.getOfflinePlayer(member).getName()).append(", ");
+                }
+
+            });
+
+            player.sendMessage("§7§lFaction members: " + members.toString().substring(0, members.toString().length() - 2));
+            player.sendMessage("§7§lFaction balance: §e" + faction.getBalance());
+            player.sendMessage("§7§lFaction power: §e" + faction.getPower() + "/" + faction.getMaxPower() + "/" + faction.getClaims().size());
+            player.sendMessage("§7§lThis faction has claims at: §e" + faction.getClaims().toString());
+
+            faction.getUpgrades().forEach((upgrade, level) -> {
+                player.sendMessage("§7§lFaction upgrade: §e" + upgrade.toString() + " §7- §e" + level);
+            });
+            return;
+
+        }
+    }
 
 
     //Faction CLAIM CHECK
     @Command(name = "faction.claimcheck", aliases = {"f.cc", "f.c.c"}, inGameOnly = false, permission = "faction.mod.claimcheck")
     public void factionClaimCheck(CommandArgs commandArgs) {
         Factions.getInstance().getFactionHandler().getFactionList().forEach(f -> {
-                    f.getClaims().forEach(c -> {
-                                commandArgs.getSender().sendMessage("§l§7Faction: §e" + f.getName() + " §7Claim: §e" + c.getX() + "," + c.getZ());
-                            }
-                    );
-                }
-        );
+            f.getClaims().forEach(c -> {
+                commandArgs.getSender().sendMessage("§l§7Faction: §e" + f.getName() + " §7Claim: §e" + c.getX() + "," + c.getZ());
+            });
+        });
 
     }
 

@@ -37,7 +37,7 @@ public class FactionHandler {
     }
 
 
-    private void updateClaimHandler() {
+    public void updateClaimHandler() {
         claimHandler.getClaims().clear();
         factionList.forEach(faction -> {
             for (Chunk claim : faction.getClaims()) {
@@ -67,6 +67,11 @@ public class FactionHandler {
                 faction.getClaims().add(Bukkit.getWorld("faction").getChunkAt(Integer.parseInt(split[0]), Integer.parseInt(split[1])));
             });
 
+            plugin.getConfig().getStringList("factions." + factionName + ".upgrades").forEach(upgrade -> {
+                String[] split = upgrade.split(",");
+                faction.getUpgrades().put(split[0], Integer.parseInt(split[1]));
+            });
+
             factionList.add(faction);
             Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_GREEN + "[FactionHandler] Faction " + factionName + " has been added to the faction list.");
         });
@@ -81,6 +86,7 @@ public class FactionHandler {
             factionList.forEach(faction -> {
                 List<String> members = new ArrayList<>();
                 List<String> chunks = new ArrayList<>();
+                List<String> upgrades = new ArrayList<>();
 
                 plugin.getConfig().set("factions." + faction.getName() + ".name", faction.getName());
                 plugin.getConfig().set("factions." + faction.getName() + ".description", faction.getDescription());
@@ -99,8 +105,14 @@ public class FactionHandler {
 
                 });
 
+                faction.getUpgrades().forEach((upgrade, level) -> {
+                    upgrades.add(upgrade + "," + level);
+
+                });
+
 
                 plugin.getConfig().set("factions." + faction.getName() + ".claims", chunks);
+                plugin.getConfig().set("factions." + faction.getName() + ".upgrades", upgrades);
 
             });
         }

@@ -6,6 +6,7 @@ import me.merlin.claims.ClaimHandler;
 import me.merlin.command.CommandFramework;
 import me.merlin.config.ConfigHandler;
 import me.merlin.faction.FactionHandler;
+import me.merlin.menu.MenuHandler;
 import me.merlin.profile.ProfileHandler;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,6 +25,7 @@ public class Factions extends JavaPlugin {
     @Getter private ClaimHandler claimHandler;
     @Getter private ConfigHandler configHandler;
     @Getter private FactionHandler factionHandler;
+    @Getter private MenuHandler menuHandler;
     @Getter private ProfileHandler profileHandler;
 
     public void onEnable() {
@@ -58,6 +60,7 @@ public class Factions extends JavaPlugin {
         claimHandler = new ClaimHandler();
         configHandler = new ConfigHandler();
         factionHandler = new FactionHandler();
+        menuHandler = new MenuHandler();
         profileHandler = new ProfileHandler();
     }
 
@@ -70,6 +73,10 @@ public class Factions extends JavaPlugin {
 
         factionsWorld = worldCreator.createWorld();
 
+        factionsWorld.getWorldBorder().setSize(5024);
+        factionsWorld.getWorldBorder().setCenter(0, 0);
+
+
     }
 }
 
@@ -80,3 +87,4 @@ public class Factions extends JavaPlugin {
 // MOD PERMS:
 // FACTION DELETE: faction.mod.delete
 // FACTION WORLDCHECK: faction.mod.worldcheck
+// FACTION ADVANCE CHECK: faction.mod.advance.check
