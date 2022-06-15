@@ -494,7 +494,7 @@ public class FactionCommands {
         }
 
 
-        player.openInventory(MenuHandler.openMainMenu(player));
+        // TODO: open faction menu
 
 
     }
