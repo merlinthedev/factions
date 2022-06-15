@@ -28,4 +28,6 @@ public abstract class Button {
     public boolean shouldUpdate(Player player, ClickType type) {
         return false;
     }
+
+   
 }

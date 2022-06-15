@@ -9,6 +9,7 @@ import me.merlin.faction.FactionHandler;
 import me.merlin.menu.MenuHandler;
 import me.merlin.profile.Profile;
 import me.merlin.profile.ProfileHandler;
+import me.merlin.upgrades.menu.UpgradeMainMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -495,6 +496,9 @@ public class FactionCommands {
 
 
         // TODO: open faction menu
+        UpgradeMainMenu upgradeMainMenu = new UpgradeMainMenu();
+        upgradeMainMenu.openMenu(player);
+        return;
 
 
     }
