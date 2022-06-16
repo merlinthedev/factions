@@ -6,10 +6,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
-@AllArgsConstructor
+
 public class UpgradeButton extends Button {
 
     private ItemStack itemStack;
+    private String name;
+
+    public UpgradeButton(ItemStack itemStack, String name) {
+        this.itemStack = itemStack;
+        this.name = name;
+
+        itemStack.getItemMeta().setDisplayName(name);
+    }
+
     @Override
     public ItemStack getButtonItem(Player player) {
         return new ItemStack(itemStack);

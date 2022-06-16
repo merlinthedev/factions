@@ -21,9 +21,9 @@ public class UpgradeMainMenu extends Menu {
     public Map<Integer, Button> getButtons(Player player) {
         Map<Integer, Button> buttonMap = Maps.newHashMap();
 
-        buttonMap.put(20, new UpgradeButton(new ItemStack(Material.TNT)));
-        buttonMap.put(22, new UpgradeButton(new ItemStack(Material.WHEAT)));
-        buttonMap.put(24, new UpgradeButton(new ItemStack(Material.ROTTEN_FLESH)));
+        buttonMap.put(20, new UpgradeButton(new ItemStack(Material.TNT), "§6§lUpgrade TNT"));
+        buttonMap.put(22, new UpgradeButton(new ItemStack(Material.WHEAT), "§6§lUpgrade Crop Drop Rate"));
+        buttonMap.put(24, new UpgradeButton(new ItemStack(Material.ROTTEN_FLESH), "§6§lUpgrade Mob Drop Rate"));
 
         buttonMap.put(40, new ExitButton());
 
