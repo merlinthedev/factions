@@ -8,6 +8,7 @@ import me.merlin.config.ConfigHandler;
 import me.merlin.faction.FactionHandler;
 import me.merlin.menu.MenuHandler;
 import me.merlin.profile.ProfileHandler;
+import me.merlin.upgrades.UpgradeHandler;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,6 +28,7 @@ public class Factions extends JavaPlugin {
     @Getter private FactionHandler factionHandler;
     @Getter private MenuHandler menuHandler;
     @Getter private ProfileHandler profileHandler;
+    @Getter private UpgradeHandler upgradeHandler;
 
     public void onEnable() {
         instance = this;
@@ -62,6 +64,7 @@ public class Factions extends JavaPlugin {
         factionHandler = new FactionHandler();
         menuHandler = new MenuHandler();
         profileHandler = new ProfileHandler();
+        upgradeHandler = new UpgradeHandler();
     }
 
     

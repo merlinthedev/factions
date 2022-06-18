@@ -8,6 +8,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 
 public class ExitButton extends Button {
@@ -16,7 +17,10 @@ public class ExitButton extends Button {
 
     public ExitButton() {
         itemStack = new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) 14);
-        itemStack.getItemMeta().setDisplayName("§4§lExit");
+        ItemMeta meta = itemStack.getItemMeta();
+        meta.setDisplayName("§c§lExit");
+        itemStack.setItemMeta(meta);
+
     }
 
     @Override

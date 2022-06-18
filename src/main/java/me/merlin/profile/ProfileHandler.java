@@ -3,6 +3,7 @@ package me.merlin.profile;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import me.merlin.Factions;
+import me.merlin.profile.command.ProfileCommands;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -18,6 +19,9 @@ public class ProfileHandler {
     public ProfileHandler() {
         profileMap = Maps.newHashMap();
 
+
+        // Register commands
+        Factions.getCommandFramework().registerCommands(new ProfileCommands());
 
         // Register ProfileListener
         Factions.getInstance().getServer().getPluginManager().registerEvents(new ProfileListener(), Factions.getInstance());

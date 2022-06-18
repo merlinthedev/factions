@@ -6,6 +6,7 @@ import me.merlin.faction.FactionHandler;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -13,7 +14,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public class ProfileListener implements Listener {
 
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(PlayerJoinEvent event) {
         System.out.println(Factions.getInstance().getName());
         Player player = event.getPlayer();

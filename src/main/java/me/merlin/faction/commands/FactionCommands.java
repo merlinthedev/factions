@@ -187,14 +187,31 @@ public class FactionCommands {
     public void factionShow(CommandArgs args) {
         Player player = args.getPlayer();
         if (args.getArgs().length == 0) {
-            Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+            player.sendMessage("check 1");
+            ProfileHandler profileHandler = Factions.getInstance().getProfileHandler();
+
+            if (!profileHandler.hasProfile(player)) {
+                player.sendMessage("§cThe profile requested doesn't exist!");
+                return;
+            }
+
+            Profile profile = profileHandler.getProfile(player);
+
+
+            if (profile == null) {
+                player.sendMessage("§cProfile is null!");
+                return;
+            }
+
             if (profile.getFaction() == null) {
                 player.sendMessage("§cYou are not in a faction!");
                 return;
             }
-            profile.getFaction().powerUpdate();
-            showFactionInformation(player, profile);
 
+
+            profile.getFaction().powerUpdate();
+            //showFactionInformation(player, profile);
+            player.sendMessage("final check");
 
         }
 
@@ -509,9 +526,9 @@ public class FactionCommands {
         player.sendMessage("§7Description: §e" + targetProfile.getFaction().getDescription());
         player.sendMessage("§7Leader: §e" + Bukkit.getOfflinePlayer(targetProfile.getFaction().getOwner()).getName());
         StringBuilder members = new StringBuilder();
-        for (UUID member : targetProfile.getFaction().getMembers())
+        for (UUID member : targetProfile.getFaction().getMembers()) {
             members.append(Bukkit.getOfflinePlayer(member).getName()).append(", ");
-
+        }
 
         player.sendMessage("§7Members: §e" + members.toString().substring(0, members.toString().length() - 2));
         player.sendMessage("§7Balance: §e" + targetProfile.getFaction().getBalance());
@@ -565,8 +582,8 @@ public class FactionCommands {
     @Command(name = "faction.advance.check", aliases = {"f.ac", "f.a.c"}, inGameOnly = true, permission = "faction.mod.advance.check")
     public void factionAdvanceCheck(CommandArgs commandArgs) {
         Player player = commandArgs.getPlayer();
-        if(commandArgs.length() < 1) {
-            if(Factions.getInstance().getProfileHandler().getProfile(player).getFaction() == null) {
+        if (commandArgs.length() < 1) {
+            if (Factions.getInstance().getProfileHandler().getProfile(player).getFaction() == null) {
                 player.sendMessage("§cYou are not in a faction!");
                 return;
             }
@@ -578,7 +595,7 @@ public class FactionCommands {
             StringBuilder members = new StringBuilder();
 
             faction.getMembers().forEach(member -> {
-                if(Bukkit.getOfflinePlayer(member).isOnline()) {
+                if (Bukkit.getOfflinePlayer(member).isOnline()) {
                     members.append("§2").append(Bukkit.getOfflinePlayer(member).getName()).append(", ");
                 } else {
                     members.append("§4").append(Bukkit.getOfflinePlayer(member).getName()).append(", ");
