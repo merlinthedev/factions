@@ -32,6 +32,8 @@ public class FactionHandler {
         Factions.getCommandFramework().registerCommands(new FactionCommands());
         claimHandler = Factions.getInstance().getClaimHandler();
 
+        plugin.getServer().getPluginManager().registerEvents(new FactionListener(), plugin);
+
         load();
         updateClaimHandler();
     }
