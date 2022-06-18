@@ -48,7 +48,7 @@ public class ConfigHandler {
         File uFile = new File(Factions.getInstance().getDataFolder() + File.separator + "players" + File.separator + uuid.toString() + ".yml");
         fileConfigMap.put(uuid, YamlConfiguration.loadConfiguration(uFile));
 
-        getFile(uuid).set("username", Factions.getInstance().getServer().getPlayer(uuid).getName());
+        getFile(uuid).set("username", Factions.getInstance().getServer().getOfflinePlayer(uuid).getName());
         saveFile(uuid);
 
 //        Logger.success("Loaded " + uuid.toString() + ".yml");

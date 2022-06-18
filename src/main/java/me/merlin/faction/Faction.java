@@ -69,13 +69,15 @@ public class Faction {
         ConfigHandler configHandler = Factions.getInstance().getConfigHandler();
         AtomicInteger sum = new AtomicInteger();
         members.forEach(member -> {
-            if (profileHandler.hasProfile(Bukkit.getPlayer(member))) {
-                sum.addAndGet(profileHandler.getProfile(Bukkit.getPlayer(member)).getPower());
+            if(Bukkit.getOfflinePlayer(member).isOnline()) {
+                sum.addAndGet(profileHandler.getProfile(Bukkit.getOfflinePlayer(member).getPlayer()).getPower());
             } else {
-                FileConfiguration file = configHandler.getFile(member);
-                sum.addAndGet(file.getInt("power"));
+                configHandler.loadFile(member);
+                sum.addAndGet(configHandler.getFile(member).getInt("power"));
             }
 
+
+            System.out.println(member);
 
             // sum.addAndGet(profileHandler.getProfile(Bukkit.getPlayer(member)).getPower());
         });

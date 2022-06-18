@@ -187,7 +187,6 @@ public class FactionCommands {
     public void factionShow(CommandArgs args) {
         Player player = args.getPlayer();
         if (args.getArgs().length == 0) {
-            player.sendMessage("check 1");
             ProfileHandler profileHandler = Factions.getInstance().getProfileHandler();
 
             if (!profileHandler.hasProfile(player)) {
@@ -209,9 +208,10 @@ public class FactionCommands {
             }
 
 
+
             profile.getFaction().powerUpdate();
-            //showFactionInformation(player, profile);
-            player.sendMessage("final check");
+            showFactionInformation(player, profile);
+
 
         }
 
