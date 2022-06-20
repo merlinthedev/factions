@@ -17,10 +17,12 @@ public class UpgradeButton extends Button {
     private final ItemStack itemStack;
     private String type;
 
+    private UpgradeHandler upgradeHandler;
 
     public UpgradeButton(ItemStack itemStack, String upgradeType) {
         this.itemStack = itemStack;
         type = upgradeType;
+        upgradeHandler = Factions.getInstance().getUpgradeHandler();
     }
 
     @Override
@@ -33,8 +35,16 @@ public class UpgradeButton extends Button {
         Faction faction = Factions.getInstance().getProfileHandler().getProfile(player).getFaction();
         if(faction.getUpgrades().get(type) < 3) {
             faction.getUpgrades().replace(type, faction.getUpgrades().get(type) + 1);
-            this.shouldUpdate(player, clickType);
+            if(faction.getBalance() > upgradeHandler.getUpgradeMap().get(type + faction.getUpgrades().get(type))) {
+                faction.setBalance(faction.getBalance() - upgradeHandler.getUpgradeMap().get(type + faction.getUpgrades().get(type)));
+            } else {
+                player.closeInventory();
+                player.sendMessage("§c§lYour faction does not have enough money to upgrade.");
+                return;
+            }
+            //faction.setBalance(faction.getBalance() - upgradeHandler.getUpgradeMap().get(type + faction.getUpgrades().get(type)));
             player.sendMessage("§aYou have upgraded your " + UpgradeHandler.convertType(type) + "!");
+
         } else {
             player.sendMessage("§cYou have already reached the maximum level for this upgrade.");
         }

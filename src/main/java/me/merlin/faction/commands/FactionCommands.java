@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -206,7 +207,6 @@ public class FactionCommands {
                 player.sendMessage("§cYou are not in a faction!");
                 return;
             }
-
 
 
             profile.getFaction().powerUpdate();
@@ -518,6 +518,98 @@ public class FactionCommands {
         return;
 
 
+    }
+
+
+    // Faction HOME
+    @Command(name = "faction.home", aliases = {"f.home"}, inGameOnly = true)
+    public void factionHome(CommandArgs args) {
+        Player player = args.getPlayer();
+        Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        if (profile.getFaction() == null) {
+            player.sendMessage("§cYou are not in a faction!");
+            return;
+        }
+
+        Faction faction = profile.getFaction();
+        if (faction.getFactionHome() == null) {
+            player.sendMessage("§cYour faction does not have a home yet!");
+            return;
+        }
+
+        // Teleport player after 5 seconds
+        Bukkit.getScheduler().runTaskLater(Factions.getInstance(), () -> {
+            player.teleport(faction.getFactionHome());
+            player.sendMessage("§2§lYou have been teleported to your faction home!");
+        }, 100L);
+    }
+
+    // Faction SETHOME
+    @Command(name = "faction.sethome", aliases = {"f.sethome"}, inGameOnly = true)
+    public void setFactionHome(CommandArgs args) {
+        Player player = args.getPlayer();
+        Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        if (profile.getFaction() == null) {
+            player.sendMessage("§cYou are not in a faction!");
+            return;
+        }
+
+        Faction faction = profile.getFaction();
+        if (!faction.getOwner().equals(player.getUniqueId())) {
+            player.sendMessage("§cYou are not the faction leader!");
+            return;
+        }
+
+        if (faction.getFactionHome() != null) {
+            player.sendMessage("§cYour faction already has a home!");
+            return;
+        }
+
+        if (player.getLocation().getWorld() != Bukkit.getWorld("faction")) {
+            player.sendMessage("§cYou can't set your faction home here!");
+            return;
+        }
+
+        if (player.getLocation().getX() < 255 && player.getLocation().getX() > -255 && player.getLocation().getZ() < 255 && player.getLocation().getZ() > -255) {
+            player.sendMessage("§cYou can't set your faction home in this area.");
+            return;
+        }
+
+        if (!faction.getClaims().contains(player.getLocation().getChunk())) {
+            player.sendMessage("§cYou can only set your faction home within your faction claims.");
+            return;
+        }
+
+        faction.setFactionHome(player.getLocation());
+        player.sendMessage("§2§lYou have set your faction home!");
+
+
+    }
+
+    // Faction DELHOME
+    @Command(name = "faction.delhome", aliases = {"f.delhome"})
+    public void deleteFactionHome(CommandArgs args) {
+        Player player = args.getPlayer();
+        Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        if (profile.getFaction() == null) {
+            player.sendMessage("§cYou are not in a faction!");
+            return;
+        }
+
+        Faction faction = profile.getFaction();
+        if (!faction.getOwner().equals(player.getUniqueId())) {
+            player.sendMessage("§cYou are not the faction leader!");
+            return;
+
+        }
+
+        if (faction.getFactionHome() == null) {
+            player.sendMessage("§cYour faction does not have a home yet!");
+            return;
+        }
+
+        faction.setFactionHome(null);
+        player.sendMessage("§2§lYou have deleted your faction home!");
     }
 
 

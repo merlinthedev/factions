@@ -8,19 +8,16 @@ import me.merlin.profile.ProfileHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class FactionHandler {
 
 
-
-
-    @Getter private List<Faction> factionList;
+    @Getter
+    private List<Faction> factionList;
 
     ClaimHandler claimHandler;
     private Factions plugin;
@@ -74,6 +71,18 @@ public class FactionHandler {
                 faction.getUpgrades().put(split[0], Integer.parseInt(split[1]));
             });
 
+            if(plugin.getConfig().get("factions." + factionName + ".home") != null) {
+                faction.setFactionHome(new Location(Bukkit.getWorld("faction"),
+                        plugin.getConfig().getDouble("factions." + factionName + ".home.x"),
+                        plugin.getConfig().getDouble("factions." + factionName + ".home.y"),
+                        plugin.getConfig().getDouble("factions." + factionName + ".home.z")
+
+                        ));
+            } else {
+                faction.setFactionHome(null);
+            }
+
+
             factionList.add(faction);
             Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_GREEN + "[FactionHandler] Faction " + factionName + " has been added to the faction list.");
         });
@@ -96,6 +105,17 @@ public class FactionHandler {
                 plugin.getConfig().set("factions." + faction.getName() + ".power", faction.getPower());
                 plugin.getConfig().set("factions." + faction.getName() + ".maxPower", faction.getMaxPower());
                 plugin.getConfig().set("factions." + faction.getName() + ".owner", faction.getOwner().toString());
+
+
+                if (faction.getFactionHome() != null) {
+                    plugin.getConfig().set("factions." + faction.getName() + ".home.x", faction.getFactionHome().getX());
+                    plugin.getConfig().set("factions." + faction.getName() + ".home.y", faction.getFactionHome().getY());
+                    plugin.getConfig().set("factions." + faction.getName() + ".home.z", faction.getFactionHome().getZ());
+                } else {
+                    plugin.getConfig().set("factions." + faction.getName() + ".home", null);
+                }
+
+
 //                plugin.getConfig().set("factions." + faction.getName() + ".members", faction.getMembers().toArray());
                 faction.getMembers().forEach(member -> {
                     members.add(member.toString());
@@ -106,6 +126,7 @@ public class FactionHandler {
                     chunks.add(claim.getX() + "," + claim.getZ());
 
                 });
+
 
                 faction.getUpgrades().forEach((upgrade, level) -> {
                     upgrades.add(upgrade + "," + level);
@@ -134,6 +155,10 @@ public class FactionHandler {
         faction.setBalance(0);
         faction.setPower(0);
         faction.getMembers().add(owner.getUniqueId());
+        faction.getUpgrades().put("tnt", 1);
+        faction.getUpgrades().put("crop", 1);
+        faction.getUpgrades().put("mob", 1);
+        faction.setFactionHome(null);
         factionList.add(faction);
         Factions.getInstance().getProfileHandler().getProfile(owner).setFaction(faction);
         owner.sendMessage(ChatColor.GREEN + "You have created " + ChatColor.GOLD + name + ChatColor.GREEN + ".");

@@ -8,6 +8,7 @@ import me.merlin.config.ConfigHandler;
 import me.merlin.profile.ProfileHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
@@ -42,6 +43,8 @@ public class Faction {
     @Getter
     @Setter
     private int power;
+
+    @Getter @Setter private Location factionHome;
 
 
     @Getter
