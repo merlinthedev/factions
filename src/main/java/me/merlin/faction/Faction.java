@@ -6,11 +6,17 @@ import lombok.Setter;
 import me.merlin.Factions;
 import me.merlin.config.ConfigHandler;
 import me.merlin.profile.ProfileHandler;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.CreatureType;
+import org.bukkit.entity.EntityType;
+import org.bukkit.material.MaterialData;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.plugin.Plugin;
 
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,38 +26,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Faction {
 
-    @Getter
-    private String name;
-    @Getter
-    @Setter
-    private String description;
-    @Getter
-    @Setter
-    private double balance;
-    @Getter
-    @Setter
-    private UUID owner;
-    @Getter
-    private List<UUID> members;
-    @Getter
-    private List<UUID> invited;
-    @Getter
-    private int maxPlayers;
-    @Getter
-    @Setter
-    private int maxPower;
-    @Getter
-    @Setter
-    private int power;
+    @Getter private String name;
+    @Getter @Setter private String description;
+    @Getter @Setter private double balance;
+    @Getter @Setter private UUID owner;
+    @Getter private List<UUID> members;
+    @Getter private List<UUID> invited;
+    @Getter private int maxPlayers;
+    @Getter @Setter private int maxPower;
+    @Getter @Setter private int power;
 
     @Getter @Setter private Location factionHome;
 
+//    @Getter private Map<Block, Integer> spawners;
+    @Getter private List<CreatureSpawner> spawners;
 
-    @Getter
-    private List<Chunk> claims;
+    @Getter @Setter private int value = 0;
 
-    @Getter
-    private Map<String, Integer> upgrades;
+    @Getter private List<Chunk> claims;
+
+    @Getter private Map<String, Integer> upgrades;
 
     public Faction(String name) {
         this.name = name;
@@ -61,6 +55,8 @@ public class Faction {
         this.invited = new ArrayList<>();
         this.maxPlayers = 20;
         this.upgrades = Maps.newHashMap();
+//        this.spawners = Maps.newHashMap();
+        this.spawners = new ArrayList<>();
         powerUpdate();
 
     }
@@ -72,7 +68,7 @@ public class Faction {
         ConfigHandler configHandler = Factions.getInstance().getConfigHandler();
         AtomicInteger sum = new AtomicInteger();
         members.forEach(member -> {
-            if(Bukkit.getOfflinePlayer(member).isOnline()) {
+            if (Bukkit.getOfflinePlayer(member).isOnline()) {
                 sum.addAndGet(profileHandler.getProfile(Bukkit.getOfflinePlayer(member).getPlayer()).getPower());
             } else {
                 configHandler.loadFile(member);
@@ -87,4 +83,13 @@ public class Faction {
         power = sum.intValue();
     }
 
+    public void valueUpdate() {
+        this.value = 0;
+        getSpawners().forEach(spawner -> {
+            String type = spawner.getCreatureTypeName();
+            System.out.println(type);
+
+        });
+
+    }
 }

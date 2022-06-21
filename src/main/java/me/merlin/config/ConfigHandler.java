@@ -1,6 +1,7 @@
 package me.merlin.config;
 
 import com.google.common.collect.Maps;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import me.merlin.Factions;
 import org.bukkit.Bukkit;
@@ -17,9 +18,28 @@ public class ConfigHandler {
 
     private Map<UUID, FileConfiguration> fileConfigMap;
 
+    @Getter private YamlConfiguration spawnerFile;
+
 
     public ConfigHandler() {
+        loadSpawnerFile();
         fileConfigMap = Maps.newHashMap();
+    }
+
+
+    @SneakyThrows
+    private void loadSpawnerFile() {
+        File sFile = new File(Factions.getInstance().getDataFolder(), "spawners.yml");
+        if(!sFile.exists()) {
+            sFile.createNewFile();
+        }
+
+        spawnerFile = YamlConfiguration.loadConfiguration(sFile);
+    }
+
+    @SneakyThrows
+    public void saveSpawnerFile() {
+        spawnerFile.save(new File(Factions.getInstance().getDataFolder(), "spawners.yml"));
     }
 
     public void createFile(UUID uuid) {

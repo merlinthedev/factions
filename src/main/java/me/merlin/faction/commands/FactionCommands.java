@@ -13,6 +13,7 @@ import me.merlin.upgrades.menu.UpgradeMainMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -526,6 +527,7 @@ public class FactionCommands {
     public void factionHome(CommandArgs args) {
         Player player = args.getPlayer();
         Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        Location startLocation = player.getLocation();
         if (profile.getFaction() == null) {
             player.sendMessage("§cYou are not in a faction!");
             return;
@@ -537,11 +539,33 @@ public class FactionCommands {
             return;
         }
 
+        player.sendMessage("§2§lCommencing teleport to your faction home...");
+
         // Teleport player after 5 seconds
-        Bukkit.getScheduler().runTaskLater(Factions.getInstance(), () -> {
-            player.teleport(faction.getFactionHome());
-            player.sendMessage("§2§lYou have been teleported to your faction home!");
-        }, 100L);
+        new BukkitRunnable() {
+            int i = 5;
+
+            public void run() {
+                if(player.getVelocity().getX() > 0 || player.getVelocity().getZ() > 0) {
+                    player.sendMessage("§cYour teleport has been canceled because you moved.");
+                    this.cancel();
+                    return;
+                }
+
+                if (i > 0) {
+                    player.sendMessage(ChatColor.DARK_GREEN + "Teleporting to faction home in " + ChatColor.YELLOW + i + ChatColor.DARK_GREEN + " seconds!");
+                }
+
+                i--;
+                if (i == -1) {
+                    this.cancel();
+                    player.teleport(faction.getFactionHome());
+                    player.sendMessage(ChatColor.DARK_GREEN + "Teleported to faction home!");
+                    return;
+                }
+
+            }
+        }.runTaskTimerAsynchronously(Factions.getInstance(), 20L, 20L);
     }
 
     // Faction SETHOME
@@ -616,6 +640,7 @@ public class FactionCommands {
     private void showFactionInformation(Player player, Profile targetProfile) {
         player.sendMessage("§6_______________.[§2" + targetProfile.getFaction().getName() + "§6]._______________");
         player.sendMessage("§7Description: §e" + targetProfile.getFaction().getDescription());
+        player.sendMessage("§7Faction Value: " + targetProfile.getFaction().getValue());
         player.sendMessage("§7Leader: §e" + Bukkit.getOfflinePlayer(targetProfile.getFaction().getOwner()).getName());
         StringBuilder members = new StringBuilder();
         for (UUID member : targetProfile.getFaction().getMembers()) {
@@ -668,6 +693,24 @@ public class FactionCommands {
     public void factionWorldCheck(CommandArgs commandArgs) {
         commandArgs.getPlayer().sendMessage("§7§lYou are in world §e" + commandArgs.getPlayer().getWorld().getName());
 
+    }
+
+    //Faction SPAWNER LIST
+    @Command(name = "faction.spawner.list", aliases = {"f.spawner.list", "f.sl"}, inGameOnly = true, permission = "faction.mod.spawner.list")
+    public void factionSpawnerList(CommandArgs commandArgs) {
+        Player player = commandArgs.getPlayer();
+        Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        if (profile.getFaction() == null) {
+            player.sendMessage("§cYou are not in a faction!");
+            return;
+        }
+
+        Faction faction = profile.getFaction();
+        faction.getSpawners().forEach(spawner -> {
+            player.sendMessage("§7§lSpawner: §e" + spawner.getCreatureTypeName() + " §7§lLocation: §e" + spawner.getLocation().getBlockX() + "," + spawner.getLocation().getBlockY() + "," + spawner.getLocation().getBlockZ());
+        });
+
+        return;
     }
 
     //Faction ADVANCE CHECK

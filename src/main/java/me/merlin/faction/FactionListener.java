@@ -2,6 +2,7 @@ package me.merlin.faction;
 
 import me.merlin.Factions;
 import org.bukkit.Material;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,11 +17,33 @@ public class FactionListener implements Listener {
     @EventHandler
     public void onSpawnerPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
-        Faction faction = Factions.getInstance().getProfileHandler().getProfile(player).getFaction();
         if (event.getBlock().getType() == Material.MOB_SPAWNER) {
+            Faction faction = Factions.getInstance().getProfileHandler().getProfile(player).getFaction();
             if (!faction.getClaims().contains(event.getBlock().getChunk())) {
                 player.sendMessage("§cYou can only place spawners in your faction's claims.");
                 event.setCancelled(true);
+                return;
+            }
+
+
+            CreatureSpawner spawner = (CreatureSpawner) event.getBlock().getState();
+
+            faction.getSpawners().add(spawner);
+            player.sendMessage("§a" + event.getBlock().getType() + " §7has been placed.");
+
+
+        }
+    }
+
+    @EventHandler
+    public void onSpawnerBreak(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        if (event.getBlock().getType() == Material.MOB_SPAWNER) {
+            Faction faction = Factions.getInstance().getProfileHandler().getProfile(player).getFaction();
+            if (!faction.getClaims().contains(event.getBlock().getChunk())) {
+                player.sendMessage("§cYou can only break spawners in your faction's claims.");
+                event.setCancelled(true);
+                return;
             }
         }
     }
@@ -47,7 +70,7 @@ public class FactionListener implements Listener {
         FactionHandler factionHandler = Factions.getInstance().getFactionHandler();
         if (event.getBlock().getType() == Material.SUGAR_CANE_BLOCK || event.getBlock().getType() == Material.CACTUS) {
             factionHandler.getFactionList().forEach(faction -> {
-                if(faction.getClaims().contains(event.getBlock().getChunk())) {
+                if (faction.getClaims().contains(event.getBlock().getChunk())) {
                     // multply the drop rate by the upgrade level
                     event.getBlock().getDrops().forEach(item -> {
                         item.setAmount(item.getAmount() * faction.getUpgrades().get("crop"));

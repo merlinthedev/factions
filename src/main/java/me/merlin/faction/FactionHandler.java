@@ -1,14 +1,18 @@
 package me.merlin.faction;
 
+import com.google.common.collect.Maps;
 import lombok.Getter;
+import lombok.val;
 import me.merlin.Factions;
 import me.merlin.claims.ClaimHandler;
+import me.merlin.config.ConfigHandler;
 import me.merlin.faction.commands.FactionCommands;
 import me.merlin.profile.ProfileHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -19,11 +23,15 @@ public class FactionHandler {
     @Getter
     private List<Faction> factionList;
 
-    ClaimHandler claimHandler;
+    @Getter private Map<String, Integer> valueMap;
+
+
+    private ClaimHandler claimHandler;
     private Factions plugin;
 
     public FactionHandler() {
         factionList = new ArrayList<>();
+        valueMap = Maps.newHashMap();
 
         plugin = Factions.getInstance();
         Factions.getCommandFramework().registerCommands(new FactionCommands());
@@ -31,8 +39,9 @@ public class FactionHandler {
 
         plugin.getServer().getPluginManager().registerEvents(new FactionListener(), plugin);
 
-        load();
+        loadFactions();
         updateClaimHandler();
+        loadSpawnerValues();
     }
 
 
@@ -45,7 +54,20 @@ public class FactionHandler {
         });
     }
 
-    private void load() {
+    private void loadSpawnerValues(){
+        ConfigHandler configHandler = Factions.getInstance().getConfigHandler();
+        if(configHandler.getSpawnerFile().getConfigurationSection("values") == null) {
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Spawner values not found in config.yml");
+            return;
+        }
+
+        configHandler.getSpawnerFile().getConfigurationSection("values").getKeys(false).forEach(spawner -> {
+            valueMap.put(spawner, configHandler.getSpawnerFile().getInt("values." + spawner));
+            System.out.println("Loaded spawner value: " + spawner + ": " + configHandler.getSpawnerFile().getInt("values." + spawner));
+        });
+    }
+
+    private void loadFactions() {
 
         if (plugin.getConfig().getConfigurationSection("factions") == null) {
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[FactionHandler] Factions section was empty!");
