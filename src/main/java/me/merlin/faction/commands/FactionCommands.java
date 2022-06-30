@@ -405,6 +405,50 @@ public class FactionCommands {
         }
     }
 
+    //Faction VALUE
+    @Command(name = "faction.value", aliases = {"f.value"}, inGameOnly = true)
+    public void factionValue(CommandArgs args) {
+        Player player = args.getPlayer();
+        Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        if (profile.getFaction() == null) {
+            player.sendMessage("§cYou are not in a faction.");
+            return;
+        }
+
+        Faction faction = profile.getFaction();
+
+
+
+
+        player.sendMessage("§7Your faction value: §e" + faction.getValue());
+        return;
+    }
+
+
+    //Faction SPAWNERS
+    @Command(name = "faction.spawners", aliases = {"f.spawners"}, inGameOnly = true)
+    public void factionSpawners(CommandArgs args) {
+        Player player = args.getPlayer();
+        Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        if (profile.getFaction() == null) {
+            player.sendMessage("§cYou are not in a faction.");
+            return;
+        }
+
+        Faction faction = profile.getFaction();
+        if(!faction.getOwner().equals(player.getUniqueId())) {
+            player.sendMessage("§cYou are not the faction leader.");
+            return;
+        }
+
+        player.sendMessage("§7Your faction spawners");
+        faction.getSpawners().forEach(spawner -> {
+            player.sendMessage("§7 - §e" + spawner.getCreatureTypeName());
+        });
+
+
+    }
+
 
     //Faction BALANCE
     @Command(name = "faction.balance", aliases = {"f.balance", "f.bal", "f.b"}, inGameOnly = true)
@@ -546,7 +590,7 @@ public class FactionCommands {
             int i = 5;
 
             public void run() {
-                if(player.getVelocity().getX() > 0 || player.getVelocity().getZ() > 0) {
+                if (player.getVelocity().getX() > 0 || player.getVelocity().getZ() > 0) {
                     player.sendMessage("§cYour teleport has been canceled because you moved.");
                     this.cancel();
                     return;
@@ -640,7 +684,7 @@ public class FactionCommands {
     private void showFactionInformation(Player player, Profile targetProfile) {
         player.sendMessage("§6_______________.[§2" + targetProfile.getFaction().getName() + "§6]._______________");
         player.sendMessage("§7Description: §e" + targetProfile.getFaction().getDescription());
-        player.sendMessage("§7Faction Value: " + targetProfile.getFaction().getValue());
+        player.sendMessage("§7Faction Value: §e" + targetProfile.getFaction().getValue());
         player.sendMessage("§7Leader: §e" + Bukkit.getOfflinePlayer(targetProfile.getFaction().getOwner()).getName());
         StringBuilder members = new StringBuilder();
         for (UUID member : targetProfile.getFaction().getMembers()) {

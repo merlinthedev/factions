@@ -104,6 +104,8 @@ public class FactionHandler {
                 faction.setFactionHome(null);
             }
 
+            faction.setValue(plugin.getConfig().getInt("factions." + factionName + ".value"));
+
 
             factionList.add(faction);
             Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_GREEN + "[FactionHandler] Faction " + factionName + " has been added to the faction list.");
@@ -127,6 +129,7 @@ public class FactionHandler {
                 plugin.getConfig().set("factions." + faction.getName() + ".power", faction.getPower());
                 plugin.getConfig().set("factions." + faction.getName() + ".maxPower", faction.getMaxPower());
                 plugin.getConfig().set("factions." + faction.getName() + ".owner", faction.getOwner().toString());
+                plugin.getConfig().set("factions." + faction.getName() + ".value", faction.getValue());
 
 
                 if (faction.getFactionHome() != null) {

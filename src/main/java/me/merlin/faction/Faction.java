@@ -84,12 +84,18 @@ public class Faction {
     }
 
     public void valueUpdate() {
-        this.value = 0;
+        ConfigHandler configHandler = Factions.getInstance().getConfigHandler();
+        FileConfiguration spawnerFile = configHandler.getSpawnerFile();
+        AtomicInteger sum = new AtomicInteger();
         getSpawners().forEach(spawner -> {
             String type = spawner.getCreatureTypeName();
             System.out.println(type);
-
+            if (spawnerFile.contains("values." + type.toLowerCase())) {
+                sum.addAndGet(spawnerFile.getInt("values." + type.toLowerCase()));
+                System.out.println(sum.intValue());
+            }
         });
 
+        value = sum.intValue();
     }
 }

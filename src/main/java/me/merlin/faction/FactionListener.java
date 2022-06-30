@@ -1,6 +1,7 @@
 package me.merlin.faction;
 
 import me.merlin.Factions;
+import me.merlin.utils.Comparison;
 import org.bukkit.Material;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
@@ -19,17 +20,18 @@ public class FactionListener implements Listener {
         Player player = event.getPlayer();
         if (event.getBlock().getType() == Material.MOB_SPAWNER) {
             Faction faction = Factions.getInstance().getProfileHandler().getProfile(player).getFaction();
-            if (!faction.getClaims().contains(event.getBlock().getChunk())) {
-                player.sendMessage("§cYou can only place spawners in your faction's claims.");
+
+            if(!Comparison.chunkComparison(event.getBlock().getChunk(), faction)) {
+                player.sendMessage("§cYou can only place spawners in your faction's chunks.");
                 event.setCancelled(true);
-                return;
             }
 
 
             CreatureSpawner spawner = (CreatureSpawner) event.getBlock().getState();
 
             faction.getSpawners().add(spawner);
-            player.sendMessage("§a" + event.getBlock().getType() + " §7has been placed.");
+            faction.valueUpdate();
+            player.sendMessage("§a" + spawner.getCreatureTypeName() + " spawner" + " §7has been placed.");
 
 
         }
@@ -40,11 +42,17 @@ public class FactionListener implements Listener {
         Player player = event.getPlayer();
         if (event.getBlock().getType() == Material.MOB_SPAWNER) {
             Faction faction = Factions.getInstance().getProfileHandler().getProfile(player).getFaction();
-            if (!faction.getClaims().contains(event.getBlock().getChunk())) {
+
+            if (!Comparison.chunkComparison(event.getBlock().getChunk(), faction)) {
                 player.sendMessage("§cYou can only break spawners in your faction's claims.");
                 event.setCancelled(true);
                 return;
             }
+
+            CreatureSpawner spawner = (CreatureSpawner) event.getBlock().getState();
+            faction.getSpawners().remove(spawner);
+            faction.valueUpdate();
+            player.sendMessage("§a" + spawner.getCreatureTypeName() + " spawner" + " §7has been broken.");
         }
     }
 
