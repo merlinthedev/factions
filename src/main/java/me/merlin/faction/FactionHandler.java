@@ -8,11 +8,13 @@ import me.merlin.claims.ClaimHandler;
 import me.merlin.config.ConfigHandler;
 import me.merlin.faction.commands.FactionCommands;
 import me.merlin.profile.ProfileHandler;
+import me.merlin.utils.Spawner;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -105,6 +107,23 @@ public class FactionHandler {
             }
 
             faction.setValue(plugin.getConfig().getInt("factions." + factionName + ".value"));
+            faction.setTntBalance(plugin.getConfig().getInt("factions." + factionName + ".tntbank"));
+
+            plugin.getConfig().getStringList("factions." + factionName + ".spawners").forEach(spawner -> {
+                faction.getSpawners().add(spawner);
+            });
+
+
+            if(plugin.getConfig().getConfigurationSection("factions." + factionName + ".warps") != null) {
+                plugin.getConfig().getConfigurationSection("factions." + factionName + ".warps").getKeys(false).forEach(warp -> {
+                    System.out.println("Loading warp: " + warp);
+                    faction.getWarps().put(warp, new Location(Bukkit.getWorld("faction"),
+                            plugin.getConfig().getDouble("factions." + factionName + ".warps." + warp + ".x"),
+                            plugin.getConfig().getDouble("factions." + factionName + ".warps." + warp + ".y"),
+                            plugin.getConfig().getDouble("factions." + factionName + ".warps." + warp + ".z")
+                    ));
+                });
+            }
 
 
             factionList.add(faction);
@@ -140,6 +159,15 @@ public class FactionHandler {
                     plugin.getConfig().set("factions." + faction.getName() + ".home", null);
                 }
 
+                if(faction.getWarps().size() < 1) {
+                    plugin.getConfig().set("factions." + faction.getName() + ".warps", null);
+                }
+                // TODO: fix this
+                faction.getWarps().forEach((name, warp) -> {
+                    plugin.getConfig().set("factions." + faction.getName() + ".warps." + name + ".x", warp.getX());
+                    plugin.getConfig().set("factions." + faction.getName() + ".warps." + name + ".y", warp.getY());
+                    plugin.getConfig().set("factions." + faction.getName() + ".warps." + name + ".z", warp.getZ());
+                });
 
 //                plugin.getConfig().set("factions." + faction.getName() + ".members", faction.getMembers().toArray());
                 faction.getMembers().forEach(member -> {
@@ -158,9 +186,15 @@ public class FactionHandler {
 
                 });
 
+                plugin.getConfig().set("factions." + faction.getName() + ".tntbank", faction.getTntBalance());
+
 
                 plugin.getConfig().set("factions." + faction.getName() + ".claims", chunks);
                 plugin.getConfig().set("factions." + faction.getName() + ".upgrades", upgrades);
+
+                List<String> spawnerList = new ArrayList<>(faction.getSpawners());
+
+                plugin.getConfig().set("factions." + faction.getName() + ".spawners", spawnerList);
 
             });
         }

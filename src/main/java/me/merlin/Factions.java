@@ -2,6 +2,7 @@ package me.merlin;
 
 import lombok.Getter;
 import me.merlin.balance.BalanceHandler;
+import me.merlin.chat.ChatHandler;
 import me.merlin.claims.ClaimHandler;
 import me.merlin.command.CommandFramework;
 import me.merlin.config.ConfigHandler;
@@ -23,6 +24,7 @@ public class Factions extends JavaPlugin {
 
 
     @Getter private BalanceHandler balanceHandler;
+    @Getter private ChatHandler chatHandler;
     @Getter private ClaimHandler claimHandler;
     @Getter private ConfigHandler configHandler;
     @Getter private FactionHandler factionHandler;
@@ -59,6 +61,7 @@ public class Factions extends JavaPlugin {
 
     private void registerHandlers() {
         balanceHandler = new BalanceHandler();
+        chatHandler = new ChatHandler();
         claimHandler = new ClaimHandler();
         configHandler = new ConfigHandler();
         factionHandler = new FactionHandler();

@@ -2,16 +2,21 @@ package me.merlin.faction;
 
 import me.merlin.Factions;
 import me.merlin.utils.Comparison;
+import me.merlin.utils.Spawner;
 import org.bukkit.Material;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.Random;
 
 public class FactionListener implements Listener {
 
@@ -29,8 +34,8 @@ public class FactionListener implements Listener {
 
             CreatureSpawner spawner = (CreatureSpawner) event.getBlock().getState();
 
-            faction.getSpawners().add(spawner);
-            faction.valueUpdate();
+            faction.getSpawners().add(spawner.getCreatureTypeName());
+            faction.addValue(spawner.getCreatureTypeName());
             player.sendMessage("§a" + spawner.getCreatureTypeName() + " spawner" + " §7has been placed.");
 
 
@@ -50,8 +55,8 @@ public class FactionListener implements Listener {
             }
 
             CreatureSpawner spawner = (CreatureSpawner) event.getBlock().getState();
-            faction.getSpawners().remove(spawner);
-            faction.valueUpdate();
+            faction.getSpawners().remove(spawner.getCreatureTypeName());
+            faction.removeValue(spawner.getCreatureTypeName());
             player.sendMessage("§a" + spawner.getCreatureTypeName() + " spawner" + " §7has been broken.");
         }
     }
@@ -70,6 +75,18 @@ public class FactionListener implements Listener {
         });
 
 
+    }
+
+
+    @EventHandler
+    public void onCreeperDeath(EntityDeathEvent event) {
+        Random random = new Random();
+        FactionHandler factionHandler = Factions.getInstance().getFactionHandler();
+        if (event.getEntity() instanceof Player) return;
+        // Check if event.getEntity() is a Creeper
+        if(event.getEntity().getType() != EntityType.CREEPER) return;
+        event.getDrops().clear();
+        event.getDrops().add(new ItemStack(Material.TNT, random.nextInt(4, 7)));
     }
 
 

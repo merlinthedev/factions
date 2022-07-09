@@ -33,6 +33,13 @@
             <version>2.8.6</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>me.merlin.cardinal</groupId>
+            <artifactId>cardinal1</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/Cardinal-1.0.jar</systemPath>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>

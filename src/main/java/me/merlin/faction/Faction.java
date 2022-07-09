@@ -3,20 +3,14 @@ package me.merlin.faction;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.Setter;
+import me.merlin.Cardinal.Cardinal;
 import me.merlin.Factions;
 import me.merlin.config.ConfigHandler;
 import me.merlin.profile.ProfileHandler;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.CreatureType;
-import org.bukkit.entity.EntityType;
-import org.bukkit.material.MaterialData;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.plugin.Plugin;
 
-import java.lang.reflect.MalformedParameterizedTypeException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class Faction {
+
+
 
     @Getter private String name;
     @Getter @Setter private String description;
@@ -38,12 +34,15 @@ public class Faction {
 
     @Getter @Setter private Location factionHome;
 
-//    @Getter private Map<Block, Integer> spawners;
-    @Getter private List<CreatureSpawner> spawners;
+    @Getter @Setter private int tntBalance;
+
+    //    @Getter private Map<Block, Integer> spawners;
+    @Getter private List<String> spawners;
 
     @Getter @Setter private int value = 0;
 
     @Getter private List<Chunk> claims;
+    @Getter private Map<String, Location> warps;
 
     @Getter private Map<String, Integer> upgrades;
 
@@ -55,6 +54,7 @@ public class Faction {
         this.invited = new ArrayList<>();
         this.maxPlayers = 20;
         this.upgrades = Maps.newHashMap();
+        this.warps = Maps.newHashMap();
 //        this.spawners = Maps.newHashMap();
         this.spawners = new ArrayList<>();
         powerUpdate();
@@ -83,19 +83,25 @@ public class Faction {
         power = sum.intValue();
     }
 
-    public void valueUpdate() {
+
+
+    public void addValue(String spawner) {
+        spawner = spawner.toLowerCase();
         ConfigHandler configHandler = Factions.getInstance().getConfigHandler();
         FileConfiguration spawnerFile = configHandler.getSpawnerFile();
-        AtomicInteger sum = new AtomicInteger();
-        getSpawners().forEach(spawner -> {
-            String type = spawner.getCreatureTypeName();
-            System.out.println(type);
-            if (spawnerFile.contains("values." + type.toLowerCase())) {
-                sum.addAndGet(spawnerFile.getInt("values." + type.toLowerCase()));
-                System.out.println(sum.intValue());
-            }
-        });
+        if(spawnerFile.contains("values." + spawner)) {
+            value += spawnerFile.getInt("values." + spawner);
+            System.out.println(value + " " + spawner);
+        }
+    }
 
-        value = sum.intValue();
+    public void removeValue(String spawner) {
+        spawner = spawner.toLowerCase();
+        ConfigHandler configHandler = Factions.getInstance().getConfigHandler();
+        FileConfiguration spawnerFile = configHandler.getSpawnerFile();
+        if(spawnerFile.contains("values." + spawner)) {
+            value -= spawnerFile.getInt("values." + spawner);
+            System.out.println(value + " " + spawner);
+        }
     }
 }

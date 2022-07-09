@@ -6,19 +6,17 @@ import me.merlin.command.Command;
 import me.merlin.command.CommandArgs;
 import me.merlin.faction.Faction;
 import me.merlin.faction.FactionHandler;
-import me.merlin.menu.MenuHandler;
+import me.merlin.faction.warp.menu.WarpMenu;
 import me.merlin.profile.Profile;
 import me.merlin.profile.ProfileHandler;
 import me.merlin.upgrades.menu.UpgradeMainMenu;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
+import me.merlin.utils.Comparison;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FactionCommands {
 
@@ -418,9 +416,81 @@ public class FactionCommands {
         Faction faction = profile.getFaction();
 
 
-
-
         player.sendMessage("§7Your faction value: §e" + faction.getValue());
+        return;
+    }
+
+    //Faction TOP
+    @Command(name = "faction.top", aliases = {"f.top"}, inGameOnly = true)
+    public void factionTop(CommandArgs args) {
+        Player player = args.getPlayer();
+        FactionHandler factionHandler = Factions.getInstance().getFactionHandler();
+        player.sendMessage("§6_______________.[§2Factions Top§6]._______________");
+        // Order factions by value
+        List<Faction> factions = factionHandler.getFactionList();
+        factions.sort(Comparator.comparing(Faction::getValue));
+        Collections.reverse(factions);
+        for (int i = 0; i < factions.size(); i++) {
+            Faction faction = factions.get(i);
+            player.sendMessage("§7§l" + (i + 1) + ". " + faction.getName() + ": §e$" + faction.getValue());
+        }
+
+    }
+
+    //Faction SETWARP
+    @Command(name = "faction.setwarp", aliases = {"f.setwarp"}, inGameOnly = true)
+    public void factionSetwarp(CommandArgs args) {
+        Player player = args.getPlayer();
+        Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        if (profile.getFaction() == null) {
+            player.sendMessage("§cYou are not in a faction.");
+            return;
+        }
+
+        if (args.getArgs().length < 1) {
+            player.sendMessage("§cUsage: /f.setwarp <warp name>");
+            return;
+        }
+
+        Faction faction = profile.getFaction();
+        if (!faction.getOwner().equals(player.getUniqueId())) {
+            player.sendMessage("§cYou are not the faction leader.");
+            return;
+        }
+
+        String warpName = args.getArgs(0);
+
+        if (!Comparison.chunkComparison(player.getLocation().getChunk(), faction)) {
+            player.sendMessage("§cYour faction doesn't own this chunk.");
+            return;
+        }
+
+        if (faction.getWarps().containsKey(warpName)) {
+            player.sendMessage("§cWarp already exists.");
+            return;
+        }
+
+        faction.getWarps().put(warpName, player.getLocation());
+        player.sendMessage("§2§lYou have set a warp: §6" + warpName);
+
+    }
+
+    //Faction WARP
+    @Command(name = "faction.warp", aliases = {"f.warp"}, inGameOnly = true)
+    public void factionWarp(CommandArgs args) {
+        Player player = args.getPlayer();
+
+        Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        if (profile.getFaction() == null) {
+            player.sendMessage("§cYou are not in a faction.");
+            return;
+        }
+
+        Faction faction = profile.getFaction();
+
+
+        WarpMenu menu = new WarpMenu();
+        menu.openMenu(player);
         return;
     }
 
@@ -436,14 +506,14 @@ public class FactionCommands {
         }
 
         Faction faction = profile.getFaction();
-        if(!faction.getOwner().equals(player.getUniqueId())) {
+        if (!faction.getOwner().equals(player.getUniqueId())) {
             player.sendMessage("§cYou are not the faction leader.");
             return;
         }
 
         player.sendMessage("§7Your faction spawners");
         faction.getSpawners().forEach(spawner -> {
-            player.sendMessage("§7 - §e" + spawner.getCreatureTypeName());
+            player.sendMessage("§7 - §e" + spawner);
         });
 
 
@@ -566,6 +636,124 @@ public class FactionCommands {
     }
 
 
+    //Faction TNT BANK
+    @Command(name = "faction.tntbank", aliases = {"f.tntbank", "f.tnt"}, inGameOnly = true)
+    public void factionTntBankCommand(CommandArgs args) {
+        Player player = args.getPlayer();
+
+        // Check Balance
+        // Withdraw
+        // Deposit
+
+        Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        if (profile.getFaction() == null) {
+            player.sendMessage("§cYou are not in a faction!");
+            return;
+        }
+
+        if (!profile.getFaction().getOwner().equals(player.getUniqueId())) {
+            player.sendMessage("§cYou are not the faction leader!");
+            return;
+        }
+
+        if (args.getArgs().length == 0) {
+            player.sendMessage("§cUsage: /faction tntbank deposit <amout>");
+            player.sendMessage("§cUsage: /faction tntbank withdraw <amout>");
+            player.sendMessage("§cUsage: /faction tntbank balance");
+            return;
+        }
+
+        if (args.getArgs().length == 1) {
+            if (args.getArgs(0).equalsIgnoreCase("balance")) {
+                player.sendMessage("§7Your faction tnt bank balance: §e" + profile.getFaction().getTntBalance());
+                return;
+            }
+
+            if (args.getArgs(0).equalsIgnoreCase("deposit")) {
+
+                AtomicInteger count = new AtomicInteger();
+
+                //Remove all tnt from player inventory
+                Arrays.stream(player.getInventory().getContents()).forEach(itemStack -> {
+                    if (itemStack != null && itemStack.getType() == Material.TNT) {
+                        count.addAndGet(itemStack.getAmount());
+                        player.getInventory().remove(itemStack);
+                    }
+                });
+                //Add tnt to faction tnt bank
+                profile.getFaction().setTntBalance(profile.getFaction().getTntBalance() + count.get());
+
+                //Send message to player
+                player.sendMessage("§2§lYou have deposited §6" + count.get() + "§2§l tnt to your faction tnt bank!");
+
+                return;
+            }
+
+            if (args.getArgs(0).equalsIgnoreCase("withdraw")) {
+                player.sendMessage("§cUsage: /faction tntbank withdraw <amout>");
+                return;
+            }
+        }
+
+        if (args.getArgs().length == 2) {
+            if (args.getArgs(0).equalsIgnoreCase("deposit")) {
+                try {
+                    int amount = Integer.parseInt(args.getArgs(1));
+                    if (amount < 1) {
+                        player.sendMessage("§cYou can't deposit less than 1!");
+                        return;
+                    }
+                    profile.getFaction().setTntBalance(profile.getFaction().getTntBalance() + amount);
+                    player.sendMessage("§2§lYou have deposited §6" + amount + "§2§l to your faction tnt bank!");
+                } catch (NumberFormatException e) {
+                    player.sendMessage("§cYou can't deposit that!");
+                }
+                return;
+            }
+        }
+
+    }
+
+
+    // Faction CHAT
+    @Command(name = "faction.chat", aliases = {"f.chat", "f.c"}, inGameOnly = true)
+    public void factionChat(CommandArgs args) {
+        Player player = args.getPlayer();
+        Profile profile = Factions.getInstance().getProfileHandler().getProfile(player);
+        if (profile.getFaction() == null) {
+            player.sendMessage("§cYou are not in a faction!");
+            profile.setChatmode(Profile.CHATMODE.FACTION);
+            return;
+        }
+
+        if (args.getArgs().length == 0) {
+            if (profile.getChatmode() == Profile.CHATMODE.FACTION) {
+                profile.setChatmode(Profile.CHATMODE.GLOBAL);
+                player.sendMessage("§2§lYou are now in global chat!");
+            } else {
+                profile.setChatmode(Profile.CHATMODE.FACTION);
+                player.sendMessage("§2§lYou are now in faction chat!");
+            }
+            return;
+        }
+
+        if (args.getArgs().length == 1) {
+            if (args.getArgs(0).equalsIgnoreCase("global") || args.getArgs(0).equalsIgnoreCase("g")) {
+                profile.setChatmode(Profile.CHATMODE.GLOBAL);
+                player.sendMessage("§2§lYou are now in global chat!");
+                return;
+            }
+            if (args.getArgs(0).equalsIgnoreCase("faction") || args.getArgs(0).equalsIgnoreCase("f")) {
+                profile.setChatmode(Profile.CHATMODE.FACTION);
+                player.sendMessage("§2§lYou are now in faction chat!");
+                return;
+            }
+        }
+
+
+    }
+
+
     // Faction HOME
     @Command(name = "faction.home", aliases = {"f.home"}, inGameOnly = true)
     public void factionHome(CommandArgs args) {
@@ -590,7 +778,7 @@ public class FactionCommands {
             int i = 5;
 
             public void run() {
-                if (player.getVelocity().getX() > 0 || player.getVelocity().getZ() > 0) {
+                if (player.getVelocity().getX() > 0 || player.getVelocity().getZ() > 0 || player.getVelocity().getY() > 0) {
                     player.sendMessage("§cYour teleport has been canceled because you moved.");
                     this.cancel();
                     return;
@@ -751,7 +939,7 @@ public class FactionCommands {
 
         Faction faction = profile.getFaction();
         faction.getSpawners().forEach(spawner -> {
-            player.sendMessage("§7§lSpawner: §e" + spawner.getCreatureTypeName() + " §7§lLocation: §e" + spawner.getLocation().getBlockX() + "," + spawner.getLocation().getBlockY() + "," + spawner.getLocation().getBlockZ());
+            player.sendMessage("§7§lSpawner: §e" + spawner);
         });
 
         return;
@@ -789,6 +977,14 @@ public class FactionCommands {
 
             faction.getUpgrades().forEach((upgrade, level) -> {
                 player.sendMessage("§7§lFaction upgrade: §e" + upgrade.toString() + " §7- §e" + level);
+            });
+
+            player.sendMessage("§7§lFaction home: §e" + faction.getFactionHome());
+
+            player.sendMessage("§7§lFaction spawners: §e" + faction.getSpawners().toString());
+            player.sendMessage("§7§lFaction warps:");
+            faction.getWarps().forEach((name, warp) -> {
+                player.sendMessage("§7§lFaction warp: §e" + name + " §7- §e" + warp);
             });
             return;
 
