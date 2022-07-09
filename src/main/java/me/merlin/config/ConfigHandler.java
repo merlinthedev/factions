@@ -19,10 +19,12 @@ public class ConfigHandler {
     private Map<UUID, FileConfiguration> fileConfigMap;
 
     @Getter private YamlConfiguration spawnerFile;
+    @Getter private YamlConfiguration kitsFile;
 
 
     public ConfigHandler() {
         loadSpawnerFile();
+        loadKitsFile();
         fileConfigMap = Maps.newHashMap();
     }
 
@@ -30,7 +32,7 @@ public class ConfigHandler {
     @SneakyThrows
     private void loadSpawnerFile() {
         File sFile = new File(Factions.getInstance().getDataFolder(), "spawners.yml");
-        if(!sFile.exists()) {
+        if (!sFile.exists()) {
             sFile.createNewFile();
         }
 
@@ -40,6 +42,21 @@ public class ConfigHandler {
     @SneakyThrows
     public void saveSpawnerFile() {
         spawnerFile.save(new File(Factions.getInstance().getDataFolder(), "spawners.yml"));
+    }
+
+    @SneakyThrows
+    private void loadKitsFile() {
+        File kFile = new File(Factions.getInstance().getDataFolder(), "kits.yml");
+        if (!kFile.exists()) {
+            kFile.createNewFile();
+        }
+
+        kitsFile = YamlConfiguration.loadConfiguration(kFile);
+    }
+
+    @SneakyThrows
+    public void saveKitsFile() {
+        kitsFile.save(new File(Factions.getInstance().getDataFolder(), "kits.yml"));
     }
 
     public void createFile(UUID uuid) {

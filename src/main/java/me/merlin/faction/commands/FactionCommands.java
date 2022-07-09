@@ -776,9 +776,11 @@ public class FactionCommands {
         // Teleport player after 5 seconds
         new BukkitRunnable() {
             int i = 5;
+            Location prev = player.getLocation();
 
             public void run() {
-                if (player.getVelocity().getX() > 0 || player.getVelocity().getZ() > 0 || player.getVelocity().getY() > 0) {
+
+                if (Comparison.hasMoved(prev, player.getLocation())) {
                     player.sendMessage("§cYour teleport has been canceled because you moved.");
                     this.cancel();
                     return;

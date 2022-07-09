@@ -3,6 +3,8 @@ package me.merlin.profile;
 import me.merlin.Factions;
 import me.merlin.config.ConfigHandler;
 import me.merlin.faction.FactionHandler;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -38,6 +40,9 @@ public class ProfileListener implements Listener {
         profile.setBalance(file.getDouble("balance"));
         profile.setPower(file.getInt("power"));
 
+        if(!player.hasPlayedBefore()) {
+            player.teleport(new Location(Bukkit.getWorld("world"), -24.5, 127, 777.5));
+        }
 
     }
 
