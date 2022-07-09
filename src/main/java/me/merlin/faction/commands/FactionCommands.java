@@ -791,13 +791,15 @@ public class FactionCommands {
                 i--;
                 if (i == -1) {
                     this.cancel();
-                    player.teleport(faction.getFactionHome());
+                    Location loc = faction.getFactionHome();
+                    loc.setWorld(Bukkit.getWorld("faction"));
+                    player.teleport(loc);
                     player.sendMessage(ChatColor.DARK_GREEN + "Teleported to faction home!");
                     return;
                 }
 
             }
-        }.runTaskTimerAsynchronously(Factions.getInstance(), 20L, 20L);
+        }.runTaskTimer(Factions.getInstance(), 20L, 20L);
     }
 
     // Faction SETHOME
