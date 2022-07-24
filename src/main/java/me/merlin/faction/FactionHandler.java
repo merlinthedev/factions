@@ -162,7 +162,7 @@ public class FactionHandler {
                 if(faction.getWarps().size() < 1) {
                     plugin.getConfig().set("factions." + faction.getName() + ".warps", null);
                 }
-                // TODO: fix this
+
                 faction.getWarps().forEach((name, warp) -> {
                     plugin.getConfig().set("factions." + faction.getName() + ".warps." + name + ".x", warp.getX());
                     plugin.getConfig().set("factions." + faction.getName() + ".warps." + name + ".y", warp.getY());

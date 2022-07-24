@@ -55,6 +55,10 @@ public class Factions extends JavaPlugin {
 
 
         Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_GREEN + "[Factions] Factions has been enabled.");
+
+
+        // Disable gamerules
+
     }
 
     public void onDisable() {
@@ -86,6 +90,9 @@ public class Factions extends JavaPlugin {
         factionsWorld.getWorldBorder().setSize(5024);
         factionsWorld.getWorldBorder().setCenter(0, 0);
 
+
+        factionsWorld.setGameRuleValue("doMobSpawning", "false");
+
         Bukkit.getConsoleSender().sendMessage("§8[§2Factions§8] §aFaction world has been created.");
 
 
@@ -93,6 +100,8 @@ public class Factions extends JavaPlugin {
         worldCreator.type(WorldType.VERSION_1_1);
 
         contentWorld = contentCreator.createWorld();
+
+        contentWorld.setGameRuleValue("doMobSpawning", "false");
 
         Bukkit.getConsoleSender().sendMessage("§8[§2Factions§8] §aContent world has been created.");
 
@@ -109,3 +118,7 @@ public class Factions extends JavaPlugin {
 // FACTION WORLDCHECK: faction.mod.worldcheck
 // FACTION ADVANCE CHECK: faction.mod.advance.check
 // FACTION WORLD MOVER: faction.mod.worldmover
+// FACTION KIT CREATE: faction.mod.kit.create
+// FACTION KIT DISPLAY-NAME: faction.mod.kit.setdisplayname
+// FACTION KIT DISPLAY_ITEM: faction.mod.kit.setdisplayitem
+// FACTION KIT SETINVENTORY: faction.mod.kit.setinventory

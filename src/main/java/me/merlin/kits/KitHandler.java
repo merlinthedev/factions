@@ -2,6 +2,7 @@ package me.merlin.kits;
 
 import lombok.Getter;
 import me.merlin.Factions;
+import me.merlin.kits.command.KitCommand;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -15,6 +16,9 @@ public class KitHandler {
     public KitHandler() {
         instance = Factions.getInstance();
         kitList = new ArrayList<>();
+
+        Factions.getCommandFramework().registerCommands(new KitCommand());
+
         load();
     }
 
